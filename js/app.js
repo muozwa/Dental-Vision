@@ -22,52 +22,23 @@ loadModel();
 // GEMINI API
 // =========================
 async function getGeminiAdvice(disease) {
-    // 🔴 LOKAL: Masukkan API Key kamu di sini saat dijalankan di browser sendiri.
-    // 🔴 GITHUB: HAPUS/KOSONGKAN kembali kunci ini sebelum melakukan git push!
-    const apiKey = ""; 
-
-    if (!apiKey) {
-        console.warn("API Key Gemini belum diisi. Menggunakan data fallback.");
-        return null; 
-    }
-
-    // Modifikasi prompt agar output Gemini berbentuk JSON terstruktur 
-    const prompt = `
-Kamu adalah dokter gigi virtual. Berikan analisis klinis singkat mengenai penyakit gigi: "${disease}".
-Berikan respon WAJIB dan HANYA dalam format JSON mentah murni (tanpa markdown \`\`\`json) seperti struktur berikut:
-{
-  "penjelasan": "Deskripsi singkat karies gigi dalam maksimal 25 kata.",
-  "gejala": ["Gejala 1", "Gejala 2", "Gejala 3"],
-  "penanganan": ["Langkah 1", "Langkah 2", "Langkah 3"],
-  "kapan_ke_dokter": "Indikasi kapan harus segera ke dokter gigi dalam maksimal 25 kata."
-}
-`;
-
     try {
-        const response = await fetch( 
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            }
-        );
+        // Otomatis menembak ke endpoint lokal/vercel tergantung aplikasi dijalankan di mana
+        const response = await fetch('/api/gemini', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ disease: disease })
+        });
 
-        const data = await response.json();
-        if (!response.ok || !data.candidates) {
+        if (!response.ok) {
             return null;
         }
 
-        // Parsing teks JSON dari Gemini
-        let rawText = data.candidates[0].content.parts[0].text.trim();
-        // Bersihkan pembungkus markdown jika gemini bandel menyertakannya
-        rawText = rawText.replace(/```json/g, "").replace(/```/g, "");
-        return JSON.parse(rawText);
+        const data = await response.json();
+        return data;
 
     } catch (error) {
-        console.error(error);
+        console.error("Error mengambil saran Gemini:", error);
         return null;
     }
 }
