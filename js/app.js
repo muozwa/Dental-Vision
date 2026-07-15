@@ -22,7 +22,7 @@ loadModel();
 // GEMINI API
 // =========================
 async function getGeminiAdvice(disease) {
-    const apiKey = "ISI-API-GEMINI";
+    const apiKey = "ISI-API-KEY"; // Ganti dengan API Key Gemini Anda
 
     // Modifikasi prompt agar output Gemini berbentuk JSON terstruktur 
     // supaya gampang dipecah ke dalam card-card kecil.
